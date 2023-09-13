@@ -7,13 +7,13 @@ import pickle
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+import pandas as pd
 
 ## Get all channel videos for a designated channel ID
 # INPUT: channel_id
 # OUTPUT: Array of video_ids for a designated channel_ID, currently limited to 50
-
-def get_channel_videos(channel_id):
-    youtube = build('youtube', 'v3', developerKey=API_KEY)
+def get_channel_videos(channel_id,creds):
+    youtube = build('youtube', 'v3', credentials=creds)
     request = youtube.search().list(
         part="snippet",
         channelId=channel_id,
@@ -28,7 +28,97 @@ def get_channel_videos(channel_id):
         video_id = item['id']['videoId']
         #video_data = get_video_data(video_id)
         #print_video_details(video_data)
-        print(f"Title: {video_title}, Video ID: {video_id}")
+        #print(f"Title: {video_title}, Video ID: {video_id}")
+        
+        #Modify this output to include video title and append that to pandas DF as well
+        #TODO
         output.append(video_id)
     
     return output
+
+# Code to authenticate via OAUTH2
+def authenticate_OAUTH2():
+    # Load client secrets
+    client_secrets_path = 'client_secret_534787313401-a3pac8r6quq2khmchdhvrbpsfdcqhc3a.apps.googleusercontent.com.json'
+    scopes = ['https://www.googleapis.com/auth/yt-analytics.readonly', 'https://www.googleapis.com/auth/youtube.readonly']
+
+    # Authenticate and get credentials
+    creds = None
+    if os.path.exists('token.pickle'):
+        with open('token.pickle', 'rb') as token:
+            creds = pickle.load(token)
+
+    if not creds or not creds.valid:
+        flow = InstalledAppFlow.from_client_secrets_file(client_secrets_path, scopes)
+        creds = flow.run_local_server(port=0)
+        with open('token.pickle', 'wb') as token:
+            pickle.dump(creds, token)
+
+    return creds
+
+
+#Code to convert a json_respone from the API call to a dataframe
+def convert_to_df(video_id, json_response):
+    column_headers = [header['name'] for header in json_response['columnHeaders']]
+    rows = json_response['rows']
+    df = pd.DataFrame(rows, columns=column_headers)
+    df['video_id'] = video_id
+    df = df[['video_id','day','views','likes','dislikes','comments']]
+    return df
+
+
+#Code to aggregate two dataframes together
+def aggregate_df(df1,df2):
+    #Rolling Sum Value is not correct. Change in the future or just plot the .rolling() of views when plotting
+    #TODO
+    df2['rolling_sum'] = df2['views'].rolling(3).sum()
+    rolling_df = pd.concat([df1,df2], ignore_index=True)
+    return rolling_df
+
+
+# Method to make the video data call.
+def get_all_video_data(creds):
+    # Build the YouTube Analytics API client
+    youtube_analytics = build('youtubeAnalytics', 'v2', credentials=creds)
+
+    # Get the channel ID
+    youtube = build('youtube', 'v3', credentials=creds)
+    #channel_response = youtube.channels().list(part='id', mine=True).execute()
+
+    #Code to retreive all videos from a given channel
+    try:
+        channel_response = youtube.channels().list(part='id', mine=True).execute()
+        channel_id = channel_response['items'][0]['id']
+        videos = get_channel_videos(channel_id,creds)
+        video_ids = videos[0:2]
+        print(f"Channel Id = {channel_id}")
+        print(f"Video ID = {video_ids}")
+
+        #Each video makes an API call to retreive data for a given timeframe. Data is then aggregated into one rolling dataframe
+        rolling_df = pd.DataFrame()
+        for video_id in video_ids:
+            print(f"Channel Id = {channel_id}")
+            print(f"Video ID = {video_id}")
+            
+            # Make an API request to YouTube Analytics
+            response = youtube_analytics.reports().query(
+                ids='channel=={}'.format(channel_id),
+                startDate='2023-01-01',
+                endDate='2023-08-31',
+                metrics='views,likes,dislikes,comments',
+                dimensions='day',
+                sort='day',
+                filters = f'video=={video_id}'
+            ).execute()
+
+            rolling_df = aggregate_df(rolling_df,convert_to_df(video_id, response))
+
+
+
+    except HttpError as e:
+        print(e.content) 
+
+    return rolling_df 
+    
+    
+
