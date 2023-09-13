@@ -11,13 +11,13 @@ import pandas as pd
 
 ## Get all channel videos for a designated channel ID
 # INPUT: channel_id
-# OUTPUT: Array of video_ids for a designated channel_ID, currently limited to 50
+# OUTPUT: Array of video_ids for a designated channel_ID, currently limited to 60
 def get_channel_videos(channel_id,creds):
     youtube = build('youtube', 'v3', credentials=creds)
     request = youtube.search().list(
         part="snippet",
         channelId=channel_id,
-        maxResults=50,
+        maxResults=60,
         type="video"
     )
     response = request.execute()
@@ -112,8 +112,6 @@ def get_all_video_data(creds):
             ).execute()
 
             rolling_df = aggregate_df(rolling_df,convert_to_df(video_id, response))
-
-
 
     except HttpError as e:
         print(e.content) 
