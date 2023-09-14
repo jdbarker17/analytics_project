@@ -1,5 +1,8 @@
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
-def visualize(df):
-    plt.pyplot.figure()
-    df['views'].plot()
+def visualize(df,video_ids):
+    for id in video_ids:
+        subset = df[df['video_id'] == id]
+        plt.figure()
+        plt.plot(subset['views'])
+        plt.show()
