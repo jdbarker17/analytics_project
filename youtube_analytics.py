@@ -22,7 +22,8 @@ def get_channel_videos(channel_id,creds):
     )
     response = request.execute()
 
-    output = []
+    video_details = []
+    
     for item in response['items']:
         video_title = item['snippet']['title']
         video_id = item['id']['videoId']
@@ -32,10 +33,10 @@ def get_channel_videos(channel_id,creds):
         
         #Modify this output to include video title and append that to pandas DF as well
         #TODO
-        output.append(video_id)
-        output.append(video_title)
+        video_details.append([video_id,video_title])
     
-    return output
+    
+    return video_details
 
 # Code to authenticate via OAUTH2
 def authenticate_OAUTH2():
@@ -62,12 +63,13 @@ def authenticate_OAUTH2():
 
 
 #Code to convert a json_respone from the API call to a dataframe
-def convert_to_df(video_id, json_response):
+def convert_to_df(video_id,json_response):
     column_headers = [header['name'] for header in json_response['columnHeaders']]
     rows = json_response['rows']
     df = pd.DataFrame(rows, columns=column_headers)
-    df['video_id'] = video_id
-    df = df[['video_id','day','views','likes','dislikes','comments']]
+    df['video_id'] = video_id[0]
+    df['title'] = video_id[1]
+    df = df[['video_id','title','day','views','likes','dislikes','comments']]
     return df
 
 
@@ -102,7 +104,7 @@ def get_all_video_data(creds):
         rolling_df = pd.DataFrame()
         for video_id in video_ids:
             print(f"Channel Id = {channel_id}")
-            print(f"Video ID = {video_id}")
+            print(f"Video ID = {video_id[0]}")
             
             # Make an API request to YouTube Analytics
             response = youtube_analytics.reports().query(
@@ -112,7 +114,7 @@ def get_all_video_data(creds):
                 metrics='views,likes,dislikes,comments',
                 dimensions='day',
                 sort='day',
-                filters = f'video=={video_id}'
+                filters = f'video=={video_id[0]}'
             ).execute()
 
             rolling_df = aggregate_df(rolling_df,convert_to_df(video_id, response))
