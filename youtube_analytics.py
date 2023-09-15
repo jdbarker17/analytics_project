@@ -33,13 +33,17 @@ def get_channel_videos(channel_id,creds):
         #Modify this output to include video title and append that to pandas DF as well
         #TODO
         output.append(video_id)
+        output.append(video_title)
     
     return output
 
 # Code to authenticate via OAUTH2
 def authenticate_OAUTH2():
     # Load client secrets
-    client_secrets_path = 'client_secret_534787313401-a3pac8r6quq2khmchdhvrbpsfdcqhc3a.apps.googleusercontent.com.json'
+    # Desktop PC
+    # client_secrets_path = 'client_secret_534787313401-a3pac8r6quq2khmchdhvrbpsfdcqhc3a.apps.googleusercontent.com.json'
+    # Mac
+    client_secrets_path = 'client_secret_534787313401-id0vari9sbmphcke6h0lg0n5o8rhm3om.apps.googleusercontent.com.json'
     scopes = ['https://www.googleapis.com/auth/yt-analytics.readonly', 'https://www.googleapis.com/auth/youtube.readonly']
 
     # Authenticate and get credentials
@@ -90,7 +94,7 @@ def get_all_video_data(creds):
         channel_response = youtube.channels().list(part='id', mine=True).execute()
         channel_id = channel_response['items'][0]['id']
         videos = get_channel_videos(channel_id,creds)
-        video_ids = videos[0:2]
+        video_ids = videos[0:15]
         print(f"Channel Id = {channel_id}")
         print(f"Video ID = {video_ids}")
 
@@ -116,7 +120,7 @@ def get_all_video_data(creds):
     except HttpError as e:
         print(e.content) 
 
-    return rolling_df 
+    return rolling_df,video_ids 
     
     
 
