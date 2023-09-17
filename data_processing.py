@@ -16,6 +16,8 @@ def visualize(df,video_ids):
         axs[id[0]].set_title(f"Video_Title: {id[1][1]}")
         axs[id[0]].set_xticks(ticks, minor=False)
         axs[id[0]].set_xticklabels(labels, fontdict=None, minor=False)
+        #Ticks should be relatively accurate. confirm this 
+        #TODO
         ticks = ticks + 243
         #axs[id[0]].xticks(ticks= ticks, labels=labels, **kwargs)
     
