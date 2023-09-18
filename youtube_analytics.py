@@ -27,12 +27,6 @@ def get_channel_videos(channel_id,creds):
     for item in response['items']:
         video_title = item['snippet']['title']
         video_id = item['id']['videoId']
-        #video_data = get_video_data(video_id)
-        #print_video_details(video_data)
-        #print(f"Title: {video_title}, Video ID: {video_id}")
-        
-        #Modify this output to include video title and append that to pandas DF as well
-        #TODO
         video_details.append([video_id,video_title])
     
     
@@ -69,17 +63,17 @@ def convert_to_df(video_id,json_response):
     df = pd.DataFrame(rows, columns=column_headers)
     df['video_id'] = video_id[0]
     df['title'] = video_id[1]
-    df = df[['video_id','title','day','views','likes','dislikes','comments']]
+    #Compute Rolling Sum per video:
+    df['rolling_sum'] = df['views'].cumsum()
+
+    df = df[['video_id','title','day','views','rolling_sum','likes','dislikes','comments']]
     return df
 
 
 #Code to aggregate two dataframes together
 def aggregate_df(df1,df2):
-    #Rolling Sum Value is not correct. Change in the future or just plot the .rolling() of views when plotting
-    #TODO
-    df2['rolling_sum'] = df2['views'].rolling(3).sum()
-    rolling_df = pd.concat([df1,df2], ignore_index=True)
-    return rolling_df
+    aggregated_df = pd.concat([df1,df2], ignore_index=True)
+    return aggregated_df
 
 
 # Method to make the video data call.
