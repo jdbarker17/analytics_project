@@ -36,9 +36,9 @@ def get_channel_videos(channel_id,creds):
 def authenticate_OAUTH2():
     # Load client secrets
     # Desktop PC
-    # client_secrets_path = 'client_secret_534787313401-a3pac8r6quq2khmchdhvrbpsfdcqhc3a.apps.googleusercontent.com.json'
+    client_secrets_path = 'client_secret_534787313401-a3pac8r6quq2khmchdhvrbpsfdcqhc3a.apps.googleusercontent.com.json'
     # Mac
-    client_secrets_path = 'client_secret_534787313401-id0vari9sbmphcke6h0lg0n5o8rhm3om.apps.googleusercontent.com.json'
+    #client_secrets_path = 'client_secret_534787313401-id0vari9sbmphcke6h0lg0n5o8rhm3om.apps.googleusercontent.com.json'
     scopes = ['https://www.googleapis.com/auth/yt-analytics.readonly', 'https://www.googleapis.com/auth/youtube.readonly']
 
     # Authenticate and get credentials
