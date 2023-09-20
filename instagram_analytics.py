@@ -1,19 +1,35 @@
+from flask import Flask, request, redirect, session
+import secret
 import requests
 
-# Get long-lived access token (this lasts for about 60 days)
-# NOTE: This requires your app to be in Live mode.
-access_token = 'YOUR_ACCESS_TOKEN'
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # for session
 
-# Get the media objects (photos, videos) of the authenticated user
-media_url = f'https://graph.instagram.com/v12.0/me/media?fields=id,caption,media_type,thumbnail_url,media_url,timestamp&access_token={access_token}'
-media_response = requests.get(media_url)
-media_data = media_response.json()
+# Your Facebook App credentials
+CLIENT_ID = secret.FB_CLIENT_ID
+CLIENT_SECRET = secret.FB_CLIENT_SECRET
+REDIRECT_URI = 'http://localhost:5000/callback'
 
-# For each media item, if it's a video, get its insights
-for item in media_data['data']:
-    if item['media_type'] == 'VIDEO':
-        video_id = item['id']
-        insights_url = f'https://graph.instagram.com/v12.0/{video_id}/insights?metric=engagement,impressions,reach,saved,video_views&access_token={access_token}'
-        insights_response = requests.get(insights_url)
-        insights_data = insights_response.json()
-        print(insights_data)
+@app.route('/')
+def index():
+    # Redirect the user to Facebook's OAuth page for Instagram permissions
+    return redirect(f'https://www.facebook.com/v12.0/dialog/oauth?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope=instagram_basic,instagram_manage_insights')
+
+@app.route('/callback')
+def callback():
+    # Facebook redirects with an authorization code
+    code = request.args.get('code')
+    
+    # Exchange the code for an access token
+    token_url = f'https://graph.facebook.com/v12.0/oauth/access_token?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&client_secret={CLIENT_SECRET}&code={code}'
+    response = requests.get(token_url)
+    data = response.json()
+    access_token = data['access_token']
+    session['access_token'] = access_token
+    
+    return f'Logged in with access token: {access_token}'
+
+# Add additional routes to make API calls for Instagram data using the access token
+
+if __name__ == '__main__':
+    app.run(debug=True)
