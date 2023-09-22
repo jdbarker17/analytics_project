@@ -1,3 +1,6 @@
+# Code to authenticate and pull analytics from a users instagram
+# FB account must be linked to instagram
+
 from flask import Flask, request, redirect, session
 import secret
 import requests
@@ -7,6 +10,7 @@ app.secret_key = 'your_secret_key'  # for session
 
 # Your Facebook App credentials
 #Updates so secret is in separate files
+#
 CLIENT_ID = secret.FB_CLIENT_ID
 CLIENT_SECRET = secret.FB_CLIENT_SECRET
 REDIRECT_URI = 'http://localhost:5000/callback'
