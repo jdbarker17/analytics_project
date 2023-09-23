@@ -1,5 +1,7 @@
 # Code to authenticate and pull analytics from a users instagram
 # FB account must be linked to instagram
+# Author: Jon Barker
+# Date 9-23-23
 
 from flask import Flask, request, redirect, session
 import secret
