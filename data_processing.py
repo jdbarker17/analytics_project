@@ -27,7 +27,8 @@ def visualize(df, video_ids):
         
         axs[row, col].plot(subset['views'])
         axs[row, col].plot(subset['rolling_sum'])
-        axs[row, col].set_title(f"Video_Title: {video_title}")
+        #axs[row, col].set_title(f"Video_Title: {video_title}")
+        axs[row, col].set_title(f"VidID: {video_id}")
         axs[row, col].set_xticks(ticks, minor=False)
         axs[row, col].set_xticklabels(labels, fontdict=None, minor=False)
         

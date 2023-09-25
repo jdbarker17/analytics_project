@@ -90,7 +90,7 @@ def get_all_video_data(creds):
         channel_response = youtube.channels().list(part='id', mine=True).execute()
         channel_id = channel_response['items'][0]['id']
         videos = get_channel_videos(channel_id,creds)
-        video_ids = videos[0:15]
+        video_ids = videos[0:8]
         print(f"Channel Id = {channel_id}")
         print(f"Video ID = {video_ids}")
 

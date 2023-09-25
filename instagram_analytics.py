@@ -11,8 +11,10 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # for session
 
 # Your Facebook App credentials
-#Updates so secret is in separate files
-#
+# Updates so secret is in separate files
+# Secret Modified to Integrate with Analytics App 2 - Functioning verification and ready for API usage.
+
+
 CLIENT_ID = secret.FB_CLIENT_ID
 CLIENT_SECRET = secret.FB_CLIENT_SECRET
 REDIRECT_URI = 'http://localhost:5000/callback'
@@ -33,6 +35,7 @@ def callback():
     data = response.json()
     access_token = data['access_token']
     session['access_token'] = access_token
+    print(f'Logged in with access token: {access_token}')
     
     return f'Logged in with access token: {access_token}'
 
