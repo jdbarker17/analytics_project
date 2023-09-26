@@ -14,6 +14,7 @@ app.secret_key = 'your_secret_key'  # for session
 # Your Facebook App credentials
 # Updates so secret is in separate files
 # Secret Modified to Integrate with Analytics App 2 - Functioning verification and ready for API usage.
+#Additional Understanding of FB Security, non functioning STILL
 
 
 CLIENT_ID = secret.FB_CLIENT_ID
