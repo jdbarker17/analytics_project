@@ -19,7 +19,7 @@ app.secret_key = 'your_secret_key'  # for session
 
 CLIENT_ID = secret.FB_CLIENT_ID
 CLIENT_SECRET = secret.FB_CLIENT_SECRET
-REDIRECT_URI = 'http://localhost:5000/callback'
+REDIRECT_URI = 'http://localhost:3017/callback'
 
 @app.route('/')
 def index():
@@ -72,6 +72,8 @@ def get_instagram_id():
 
             if 'instagram_business_account' in insta_data:
                 instagram_id = insta_data['instagram_business_account']['id']
+                session['instagram_id'] = instagram_id
+
                 return f'Instagram Creator Account ID: {instagram_id}'
                 #return instagram_id
                 #return redirect('/get_instagram_data')
@@ -83,7 +85,6 @@ def get_instagram_id():
         return f"Error fetching User's Pages: {error_message}"
     
     
-
 @app.route('/get_instagram_data')
 def get_instagram_data():
     access_token = session.get('access_token')
@@ -91,21 +92,46 @@ def get_instagram_data():
         return "Access token not found. Please authenticate first."
 
     # Fetch the Instagram Business Account ID
-    #me_url = f'https://graph.facebook.com/v12.0/me?fields=instagram_business_account&access_token={access_token}'
-    #response = requests.get(me_url)
-    #data = response.json()
-    #print(json.dumps(data))
-    #instagram_id = data['instagram_business_account']['id']
-    instagram_id = get_instagram_id()
+    instagram_id = session.get('instagram_id')
+    if not instagram_id:
+        return "Instagram ID not found. Please fetch it first."
+
     # Fetch recent media objects from the Instagram Business Account
-    media_url = f'https://graph.facebook.com/v12.0/{instagram_id}/media?access_token={access_token}'
+    media_url = f'https://graph.facebook.com/v12.0/{instagram_id}/media?fields=id,media_type&access_token={access_token}'
     media_response = requests.get(media_url)
     media_data = media_response.json()
 
-    return media_data
+    if 'data' not in media_data:
+        return f"Error fetching media data: {media_data.get('error', {}).get('message', 'Unknown error.')}"
+
+    # Fetch insights for each media object
+    insights_data = []
+    for media in media_data['data']:
+        print(f'media = {media}')
+        #if media['media_type'] == 'IMAGE' or media['media_type'] == 'VIDEO':
+            # It's a photo
+        #     metrics = "impressions,reach,saved,video_views"
+
+        #elif media['media_type'] == 'REEL':
+        metrics = "comments,likes,plays,reach,saved,shares,total_interactions"
+        
+        
+        media_id = media['id']
+        # Define the metrics you want to fetch
+    
+        insights_url = f'https://graph.facebook.com/v12.0/{media_id}/insights?metric={metrics}&access_token={access_token}'
+        insights_response = requests.get(insights_url)
+        insights = insights_response.json()
+        insights_data.append({
+            'media_id': media_id,
+            'insights': insights
+        })
+
+    return json.dumps(insights_data, indent=4)
+
 
 # ... [Your existing code to run the app]
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port= 3017)
