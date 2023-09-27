@@ -73,6 +73,7 @@ def get_instagram_id():
             if 'instagram_business_account' in insta_data:
                 instagram_id = insta_data['instagram_business_account']['id']
                 return f'Instagram Creator Account ID: {instagram_id}'
+                #return redirect('/get_instagram_data')
 
         # Return the debug information for inspection
         return f"No associated Instagram Creator Account found. Debug Info: {debug_info}"
