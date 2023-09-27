@@ -73,6 +73,7 @@ def get_instagram_id():
             if 'instagram_business_account' in insta_data:
                 instagram_id = insta_data['instagram_business_account']['id']
                 return f'Instagram Creator Account ID: {instagram_id}'
+                #return instagram_id
                 #return redirect('/get_instagram_data')
 
         # Return the debug information for inspection
@@ -90,11 +91,12 @@ def get_instagram_data():
         return "Access token not found. Please authenticate first."
 
     # Fetch the Instagram Business Account ID
-    me_url = f'https://graph.facebook.com/v12.0/me?fields=instagram_business_account&access_token={access_token}'
-    response = requests.get(me_url)
-    data = response.json()
-    instagram_id = data['instagram_business_account']['id']
-
+    #me_url = f'https://graph.facebook.com/v12.0/me?fields=instagram_business_account&access_token={access_token}'
+    #response = requests.get(me_url)
+    #data = response.json()
+    #print(json.dumps(data))
+    #instagram_id = data['instagram_business_account']['id']
+    instagram_id = get_instagram_id()
     # Fetch recent media objects from the Instagram Business Account
     media_url = f'https://graph.facebook.com/v12.0/{instagram_id}/media?access_token={access_token}'
     media_response = requests.get(media_url)
