@@ -3,7 +3,7 @@
 # Author: Jon Barker
 # Date 9-23-23
 
-from flask import Flask, request, redirect, session
+from flask import Flask, request, redirect, session, render_template
 import secret
 import requests
 import json
@@ -114,8 +114,6 @@ def get_instagram_data():
 
         #elif media['media_type'] == 'REEL':
         metrics = "comments,likes,plays,reach,saved,shares,total_interactions"
-        
-        
         media_id = media['id']
         # Define the metrics you want to fetch
     
@@ -126,12 +124,49 @@ def get_instagram_data():
             'media_id': media_id,
             'insights': insights
         })
+    response = json.dumps(insights_data, sort_keys = True, indent = 4, separators = (',', ': '))
+    return render_template('data.html', response = response)
+    #return response
+    #return json.dumps(insights_data, indent=4)
 
-    return json.dumps(insights_data, indent=4)
 
 
-# ... [Your existing code to run the app]
+@app.route('/get_all_content')
+def get_all_content():
 
+    #Fetch Access token
+    access_token = session.get('access_token')
+    if not access_token:
+        return "Access token not found. Please authenticate first."
+    
+    # Fetch the Instagram Business Account ID
+    instagram_id = session.get('instagram_id')
+    if not instagram_id:
+        return "Instagram ID not found. Please fetch it first."
+    
+
+    base_url = f'https://graph.facebook.com/v12.0/{instagram_id}/media'
+    params = {
+        'fields': 'id,media_type',
+        'access_token': access_token
+    }
+    
+    all_media = []
+    
+    while base_url:
+        response = requests.get(base_url, params=params)
+        data = response.json()
+        all_media.extend(data.get('data', []))
+        
+        # Check if there's a next page
+        base_url = data.get('paging', {}).get('next', None)
+        # Reset params as the next URL will have them
+        params = {}
+    
+    return all_media
+
+    
+  
 
 if __name__ == '__main__':
     app.run(debug=True, port= 3017)
