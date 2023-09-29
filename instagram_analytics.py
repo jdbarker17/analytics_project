@@ -162,7 +162,10 @@ def get_all_content():
         base_url = data.get('paging', {}).get('next', None)
         # Reset params as the next URL will have them
         params = {}
-    
+
+    print(f'type of media = {type(all_media[0])}')
+    #array = json.loads(all_media[0])
+    #print(array)
     return all_media
 
     
