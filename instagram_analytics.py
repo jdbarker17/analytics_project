@@ -130,7 +130,7 @@ def get_instagram_data():
     #return json.dumps(insights_data, indent=4)
 
 
-
+# Code to be able to oull all media and types
 @app.route('/get_all_content')
 def get_all_content():
 
